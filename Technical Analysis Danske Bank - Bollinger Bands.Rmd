@@ -1,0 +1,102 @@
+---
+title: "Technical Analysis Danske Bank - Bollinger Bands"
+author: "Muhammet Agar"
+date: "6/14/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Why?
+
+Lately, I found myself having an increased interest in the stock market. I've decided to trade stocks on a more regular basis and found technical analysis pretty fun to do. 
+
+As I'm naturally a data driven person I love the insights of technical analysis.
+
+## Load the relevant packages
+
+```{r packages}
+library("PerformanceAnalytics")
+library("quantmod")
+library("ggplot2")
+library("knitr")
+library("png")
+```
+
+```{r getSymbols, message=FALSE, warning=FALSE}
+getSymbols("DANSKE.CO",src="yahoo", from="2018-01-01", to="2019-06-13")
+```
+
+## Looking into the Danske Bank stock
+```{r}
+chartSeries(Ad(DANSKE.CO))
+```
+
+## Adding the Bollinger Bands and Volume
+```{r}
+chartSeries(DANSKE.CO,TA='addBBands();addVo()',subset='2019')
+```
+
+Finally. It's starting to look like the complex plots of stocks. Don't worry, this is the complex it's gonna get.
+
+## Let’s look closer at Bollinger Bands
+```{r}
+tail(BBands(HLC(DANSKE.CO)))
+```
+Here we see the results for the last 6 days of Bollinger Band results. We see the date, the values for the lower Bollinger Bands, the middle Moving Average, the upper BB, and lastly the %B calculation.
+
+This implies, the upper end is slowly closing down, going from 115.9 to 113.8 in only a couple of days. 
+
+Next I would like to see the average BB upper and lower, and compare them somehow. 
+
+```{r}
+down <- BBands(HLC(DANSKE.CO))$dn[20:nrow(DANSKE.CO)]
+head(down)
+tail(down)
+```
+
+I have isolated the lower end values - the entire column into my data.frame "down".
+
+As the first 19 rows of the data.frame is used to calculate the moving average of 20 days, they are NA’s, thus they're excluded. Therefore, the call starts from the 20th row to the last.
+
+I’m doing the same for the upper end values.
+```{r}
+upper <- BBands(HLC(DANSKE.CO))$up[20:nrow(DANSKE.CO)]
+tail(upper)
+```
+## What does the Bollinger Bands indicate?
+Now. I would like to know the average distance between the upper and lower Bollinger Bands, so I take the average of both variables and use the difference as an indicator. But wait, there’s more.
+
+I assume it wouldn’t make so much sense to use the BB numbers from 2018-01-01, so I focus on the last 20 days, and use those averages, as they could be a better indicator, and describe the trend of the Danske Bank stock.
+
+```{r}
+mean(tail(upper$up,20)) - mean(tail(down$dn,20))
+```
+So the average distance for the last 20 days is around 19.60 kroner.
+
+I wonder if there's a difference between the average of the last 20 days, and 10 days? As the last 10 days would be useful for comparison, to see the trend.
+
+```{r}
+mean(tail(upper$up,10)) - mean(tail(down$dn,10))
+```
+This is interesting.
+There's almost a 10 DKK difference. 
+
+This indicates that the Bollinger Bands might be closing in and that one should be looking for a sell soon, if it corresponds with other indicators. 
+
+
+Just for the sake of curosity, let's take a look at the last 5 days.
+```{r}
+mean(tail(upper$up,5)) - mean(tail(down$dn,5))
+```
+
+Oh, the bands are definitely closing in.
+
+## Words
+My name is Muhammed Agar, let me know if you liked what you saw.
+
+This was a first for me. I am in no way an expert in finance, nor stocks, but I hope you like what you saw, let me know if anything is wrong, or any assumption is misplaced.
+
+Don't take my words for a nudge to buy Danske Bank stocks, just some insight.
